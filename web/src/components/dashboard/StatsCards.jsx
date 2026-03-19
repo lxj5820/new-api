@@ -17,11 +17,12 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 For commercial licensing, please contact support@quantumnous.com
 */
 
-import React from 'react';
+import React, { useContext } from 'react';
 import { Card, Avatar, Skeleton, Tag } from '@douyinfe/semi-ui';
 import { VChart } from '@visactor/react-vchart';
 import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
+import { StatusContext } from '../../context/Status';
 
 const StatsCards = ({
   groupedStatsData,
@@ -32,6 +33,8 @@ const StatsCards = ({
 }) => {
   const navigate = useNavigate();
   const { t } = useTranslation();
+  const [statusState] = useContext(StatusContext);
+  const enablePayment = statusState?.status?.enable_payment !== false;
   return (
     <div className='mb-4'>
       <div className='grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4'>
@@ -80,7 +83,7 @@ const StatsCards = ({
                       </div>
                     </div>
                   </div>
-                  {item.title === t('当前余额') ? (
+                  {item.title === t('当前余额') && enablePayment ? (
                     <Tag
                       color='white'
                       shape='circle'

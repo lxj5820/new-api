@@ -28,7 +28,7 @@ import {
   copy,
   getQuotaPerUnit,
 } from '../../helpers';
-import { Modal, Toast } from '@douyinfe/semi-ui';
+import { Modal, Toast, Empty } from '@douyinfe/semi-ui';
 import { useTranslation } from 'react-i18next';
 import { UserContext } from '../../context/User';
 import { StatusContext } from '../../context/Status';
@@ -56,6 +56,7 @@ const TopUp = () => {
   const [enableOnlineTopUp, setEnableOnlineTopUp] = useState(
     statusState?.status?.enable_online_topup || false,
   );
+  const [enablePayment, setEnablePayment] = useState(false);
   const [priceRatio, setPriceRatio] = useState(statusState?.status?.price || 1);
 
   const [enableStripeTopUp, setEnableStripeTopUp] = useState(
@@ -150,6 +151,11 @@ const TopUp = () => {
   };
 
   const preTopUp = async (payment) => {
+    if (!enablePayment) {
+      showError(t('支付功能已关闭'));
+      return;
+    }
+
     if (payment === 'stripe') {
       if (!enableStripeTopUp) {
         showError(t('管理员未开启Stripe充值！'));
@@ -265,6 +271,11 @@ const TopUp = () => {
   };
 
   const creemPreTopUp = async (product) => {
+    if (!enablePayment) {
+      showError(t('支付功能已关闭'));
+      return;
+    }
+
     if (!enableCreemTopUp) {
       showError(t('管理员未开启 Creem 充值！'));
       return;
@@ -442,17 +453,20 @@ const TopUp = () => {
           // 这个逻辑现在由后端处理，如果 Stripe 启用，后端会在 pay_methods 中包含它
 
           setPayMethods(payMethods);
-          const enableStripeTopUp = data.enable_stripe_topup || false;
-          const enableOnlineTopUp = data.enable_online_topup || false;
-          const enableCreemTopUp = data.enable_creem_topup || false;
-          const minTopUpValue = enableOnlineTopUp
-            ? data.min_topup
-            : enableStripeTopUp
-              ? data.stripe_min_topup
-              : 1;
-          setEnableOnlineTopUp(enableOnlineTopUp);
-          setEnableStripeTopUp(enableStripeTopUp);
-          setEnableCreemTopUp(enableCreemTopUp);
+        const enablePayment = data.enable_payment !== undefined ? data.enable_payment : true;
+        // 当支付功能关闭时，所有支付方式都应该被禁用
+        const enableStripeTopUp = enablePayment && (data.enable_stripe_topup || false);
+        const enableOnlineTopUp = enablePayment && (data.enable_online_topup || false);
+        const enableCreemTopUp = enablePayment && (data.enable_creem_topup || false);
+        const minTopUpValue = enableOnlineTopUp
+          ? data.min_topup
+          : enableStripeTopUp
+            ? data.stripe_min_topup
+            : 1;
+        setEnablePayment(enablePayment);
+        setEnableOnlineTopUp(enableOnlineTopUp);
+        setEnableStripeTopUp(enableStripeTopUp);
+        setEnableCreemTopUp(enableCreemTopUp);
           setMinTopUp(minTopUpValue);
           setTopUpCount(minTopUpValue);
 
@@ -664,6 +678,18 @@ const TopUp = () => {
     }));
   };
 
+  if (!enablePayment) {
+    return (
+      <div className='w-full max-w-7xl mx-auto relative min-h-screen lg:min-h-0 mt-[60px] px-2'>
+        <Empty
+          title={t('充值功能已关闭')}
+          description={t('请联系管理员开启充值功能')}
+          style={{ marginTop: 100 }}
+        />
+      </div>
+    );
+  }
+
   return (
     <div className='w-full max-w-7xl mx-auto relative min-h-screen lg:min-h-0 mt-[60px] px-2'>
       {/* 划转模态框 */}
@@ -735,6 +761,7 @@ const TopUp = () => {
       <div className='grid grid-cols-1 lg:grid-cols-2 gap-6'>
         <RechargeCard
           t={t}
+          enablePayment={enablePayment}
           enableOnlineTopUp={enableOnlineTopUp}
           enableStripeTopUp={enableStripeTopUp}
           enableCreemTopUp={enableCreemTopUp}

@@ -17,7 +17,7 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 For commercial licensing, please contact support@quantumnous.com
 */
 
-import React, { useRef } from 'react';
+import React, { useRef, useContext } from 'react';
 import { Link } from 'react-router-dom';
 import { Avatar, Button, Dropdown, Typography } from '@douyinfe/semi-ui';
 import { ChevronDown } from 'lucide-react';
@@ -29,6 +29,7 @@ import {
 } from '@douyinfe/semi-icons';
 import { stringToColor } from '../../../helpers';
 import SkeletonWrapper from '../components/SkeletonWrapper';
+import { StatusContext } from '../../../context/Status';
 
 const UserArea = ({
   userState,
@@ -40,6 +41,9 @@ const UserArea = ({
   t,
 }) => {
   const dropdownRef = useRef(null);
+  const [statusState] = useContext(StatusContext);
+  const enablePayment = statusState?.status?.enable_payment !== false;
+
   if (isLoading) {
     return (
       <SkeletonWrapper
@@ -87,6 +91,7 @@ const UserArea = ({
                   <span>{t('令牌管理')}</span>
                 </div>
               </Dropdown.Item>
+              {enablePayment && (
               <Dropdown.Item
                 onClick={() => {
                   navigate('/console/topup');
@@ -101,6 +106,7 @@ const UserArea = ({
                   <span>{t('钱包管理')}</span>
                 </div>
               </Dropdown.Item>
+              )}
               <Dropdown.Item
                 onClick={logout}
                 className='!px-3 !py-1.5 !text-sm !text-semi-color-text-0 hover:!bg-semi-color-fill-1 dark:!text-gray-200 dark:hover:!bg-red-500 dark:hover:!text-white'

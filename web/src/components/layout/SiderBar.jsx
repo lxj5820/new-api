@@ -17,7 +17,7 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 For commercial licensing, please contact support@quantumnous.com
 */
 
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useState, useContext } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { getLucideIcon } from '../../helpers/render';
@@ -27,6 +27,7 @@ import { useSidebar } from '../../hooks/common/useSidebar';
 import { useMinimumLoadingTime } from '../../hooks/common/useMinimumLoadingTime';
 import { isAdmin, isRoot, showError } from '../../helpers';
 import SkeletonWrapper from './components/SkeletonWrapper';
+import { StatusContext } from '../../context/Status';
 
 import { Nav, Divider, Button } from '@douyinfe/semi-ui';
 
@@ -59,6 +60,8 @@ const SiderBar = ({ onNavigate = () => {} }) => {
     hasSectionVisibleModules,
     loading: sidebarLoading,
   } = useSidebar();
+  const [statusState] = useContext(StatusContext);
+  const enablePayment = statusState?.status?.enable_payment !== false;
 
   const showSkeleton = useMinimumLoadingTime(sidebarLoading, 200);
 
@@ -138,12 +141,16 @@ const SiderBar = ({ onNavigate = () => {} }) => {
 
     // 根据配置过滤项目
     const filteredItems = items.filter((item) => {
+      // 如果是钱包管理，检查支付开关
+      if (item.itemKey === 'topup' && !enablePayment) {
+        return false;
+      }
       const configVisible = isModuleVisible('personal', item.itemKey);
       return configVisible;
     });
 
     return filteredItems;
-  }, [t, isModuleVisible]);
+  }, [t, isModuleVisible, enablePayment]);
 
   const adminItems = useMemo(() => {
     const items = [

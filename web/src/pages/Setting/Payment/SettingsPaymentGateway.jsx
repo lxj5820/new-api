@@ -18,7 +18,7 @@ For commercial licensing, please contact support@quantumnous.com
 */
 
 import React, { useEffect, useState, useRef } from 'react';
-import { Button, Form, Row, Col, Typography, Spin } from '@douyinfe/semi-ui';
+import { Button, Form, Row, Col, Typography, Spin, Switch } from '@douyinfe/semi-ui';
 const { Text } = Typography;
 import {
   API,
@@ -33,6 +33,7 @@ export default function SettingsPaymentGateway(props) {
   const { t } = useTranslation();
   const [loading, setLoading] = useState(false);
   const [inputs, setInputs] = useState({
+    PaymentEnabled: true,
     PayAddress: '',
     EpayId: '',
     EpayKey: '',
@@ -50,6 +51,10 @@ export default function SettingsPaymentGateway(props) {
   useEffect(() => {
     if (props.options && formApiRef.current) {
       const currentInputs = {
+        PaymentEnabled:
+          props.options.PaymentEnabled !== undefined
+            ? props.options.PaymentEnabled
+            : true,
         PayAddress: props.options.PayAddress || '',
         EpayId: props.options.EpayId || '',
         EpayKey: props.options.EpayKey || '',
@@ -180,6 +185,12 @@ export default function SettingsPaymentGateway(props) {
           value: inputs.AmountDiscount,
         });
       }
+      if (originInputs['PaymentEnabled'] !== inputs.PaymentEnabled) {
+        options.push({
+          key: 'payment_setting.enabled',
+          value: inputs.PaymentEnabled.toString(),
+        });
+      }
 
       // 发送请求
       const requestQueue = options.map((opt) =>
@@ -222,6 +233,11 @@ export default function SettingsPaymentGateway(props) {
               '（当前仅支持易支付接口，默认使用上方服务器地址作为回调地址！）',
             )}
           </Text>
+          <Form.Switch
+            field='PaymentEnabled'
+            label={t('开启支付功能')}
+            extraText={t('关闭后用户将无法使用充值和订阅功能')}
+          />
           <Row gutter={{ xs: 8, sm: 16, md: 24, lg: 24, xl: 24, xxl: 24 }}>
             <Col xs={24} sm={24} md={8} lg={8} xl={8}>
               <Form.Input

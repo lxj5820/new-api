@@ -17,10 +17,29 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 For commercial licensing, please contact support@quantumnous.com
 */
 
-import React from 'react';
+import React, { useContext } from 'react';
 import SubscriptionsPage from '../../components/table/subscriptions';
+import { StatusContext } from '../../context/Status';
+import { Empty } from '@douyinfe/semi-ui';
+import { useTranslation } from 'react-i18next';
 
 const Subscription = () => {
+  const [statusState] = useContext(StatusContext);
+  const { t } = useTranslation();
+  const enablePayment = statusState?.status?.enable_payment !== false;
+
+  if (!enablePayment) {
+    return (
+      <div className='mt-[60px] px-2'>
+        <Empty
+          title={t('充值功能已关闭')}
+          description={t('请联系管理员开启充值功能')}
+          style={{ marginTop: 100 }}
+        />
+      </div>
+    );
+  }
+
   return (
     <div className='mt-[60px] px-2'>
       <SubscriptionsPage />

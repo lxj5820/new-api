@@ -10,7 +10,9 @@ import (
 	"github.com/QuantumNous/new-api/common"
 	"github.com/QuantumNous/new-api/model"
 	"github.com/QuantumNous/new-api/setting"
+	"github.com/QuantumNous/new-api/setting/operation_setting"
 	"github.com/QuantumNous/new-api/setting/system_setting"
+
 	"github.com/gin-gonic/gin"
 	"github.com/stripe/stripe-go/v81"
 	"github.com/stripe/stripe-go/v81/checkout/session"
@@ -22,6 +24,11 @@ type SubscriptionStripePayRequest struct {
 }
 
 func SubscriptionRequestStripePay(c *gin.Context) {
+	if !operation_setting.GetPaymentSetting().Enabled {
+		c.JSON(200, gin.H{"message": "error", "data": "支付功能已关闭"})
+		return
+	}
+
 	var req SubscriptionStripePayRequest
 	if err := c.ShouldBindJSON(&req); err != nil || req.PlanId <= 0 {
 		common.ApiErrorMsg(c, "参数错误")

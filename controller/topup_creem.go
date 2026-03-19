@@ -8,13 +8,15 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"github.com/QuantumNous/new-api/common"
-	"github.com/QuantumNous/new-api/model"
-	"github.com/QuantumNous/new-api/setting"
 	"io"
 	"log"
 	"net/http"
 	"time"
+
+	"github.com/QuantumNous/new-api/common"
+	"github.com/QuantumNous/new-api/model"
+	"github.com/QuantumNous/new-api/setting"
+	"github.com/QuantumNous/new-api/setting/operation_setting"
 
 	"github.com/gin-gonic/gin"
 	"github.com/thanhpk/randstr"
@@ -143,6 +145,11 @@ func (*CreemAdaptor) RequestPay(c *gin.Context, req *CreemPayRequest) {
 }
 
 func RequestCreemPay(c *gin.Context) {
+	if !operation_setting.GetPaymentSetting().Enabled {
+		c.JSON(200, gin.H{"message": "error", "data": "支付功能已关闭"})
+		return
+	}
+
 	var req CreemPayRequest
 
 	// 读取body内容用于打印，同时保留原始数据供后续使用

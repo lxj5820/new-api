@@ -40,6 +40,7 @@ const PaymentSetting = () => {
     PayMethods: '',
     AmountOptions: '',
     AmountDiscount: '',
+    PaymentEnabled: true,
 
     StripeApiSecret: '',
     StripeWebhookSecret: '',
@@ -93,6 +94,9 @@ const PaymentSetting = () => {
               console.error('解析AmountDiscount出错:', error);
               newInputs['AmountDiscount'] = item.value;
             }
+            break;
+          case 'payment_setting.enabled':
+            newInputs['PaymentEnabled'] = toBoolean(item.value);
             break;
           case 'Price':
           case 'MinTopUp':

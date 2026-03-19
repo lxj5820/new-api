@@ -3,7 +3,7 @@ package operation_setting
 import "github.com/QuantumNous/new-api/setting/config"
 
 type PaymentSetting struct {
-	Enabled        bool              `json:"enabled"`
+	Enabled        bool              `json:"enabled"` // 控制支付功能的全局开关，默认为true
 	AmountOptions  []int             `json:"amount_options"`
 	AmountDiscount map[int]float64   `json:"amount_discount"`
 }

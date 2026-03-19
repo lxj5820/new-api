@@ -48,11 +48,13 @@ func GetTopUpInfo(c *gin.Context) {
 		}
 	}
 
+	paymentEnabled := operation_setting.GetPaymentSetting().Enabled
+
 	data := gin.H{
-		"enable_payment":       operation_setting.GetPaymentSetting().Enabled,
-		"enable_online_topup":  operation_setting.PayAddress != "" && operation_setting.EpayId != "" && operation_setting.EpayKey != "",
-		"enable_stripe_topup":  setting.StripeApiSecret != "" && setting.StripeWebhookSecret != "" && setting.StripePriceId != "",
-		"enable_creem_topup":   setting.CreemApiKey != "" && setting.CreemProducts != "[]",
+		"enable_payment":       paymentEnabled,
+		"enable_online_topup":  paymentEnabled && operation_setting.PayAddress != "" && operation_setting.EpayId != "" && operation_setting.EpayKey != "",
+		"enable_stripe_topup":  paymentEnabled && setting.StripeApiSecret != "" && setting.StripeWebhookSecret != "" && setting.StripePriceId != "",
+		"enable_creem_topup":   paymentEnabled && setting.CreemApiKey != "" && setting.CreemProducts != "[]",
 		"creem_products":       setting.CreemProducts,
 		"pay_methods":          payMethods,
 		"min_topup":            operation_setting.MinTopUp,
@@ -128,7 +130,7 @@ func getMinTopup() int64 {
 
 func RequestEpay(c *gin.Context) {
 	if !operation_setting.GetPaymentSetting().Enabled {
-		c.JSON(200, gin.H{"message": "error", "data": "支付功能已关闭"})
+		c.JSON(503, gin.H{"message": "error", "data": "支付功能已关闭"})
 		return
 	}
 

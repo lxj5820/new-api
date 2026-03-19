@@ -20,7 +20,7 @@ type SubscriptionCreemPayRequest struct {
 
 func SubscriptionRequestCreemPay(c *gin.Context) {
 	if !operation_setting.GetPaymentSetting().Enabled {
-		c.JSON(200, gin.H{"message": "error", "data": "支付功能已关闭"})
+		c.JSON(503, gin.H{"message": "error", "data": "支付功能已关闭"})
 		return
 	}
 
